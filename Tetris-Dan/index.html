@@ -2,12 +2,114 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/T-logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <script defer type="module" src="/main.js"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100&family=Pixelify+Sans&display=swap');
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <title>Tetris by Dan</title>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
+    <header>
+      <h1>TETRIS</h1>
+      <h5>by Dan</h5>
+    </header>
+
+    
+    <div id="start">
+      <form id="level-select">
+        <button id="easy-button">Easy</button>
+        <button id="medium-button">Medium</button>
+        <button id="hard-button">Hard</button>
+      </form>
+      <div id="highscores">
+        <h3>Highscores:</h3>
+        <span class="top5"><p>Dan</p><p>9999</p></span>
+        <span class="top5"><p>Stanley</p><p>8000</p></span>
+        <span class="top5"><p>Donald Trump</p><p>7</p></span>
+      </div>
+    </div>
+    
+    <div id="game">
+      <div id="game-left">
+        <div id="game-hold" class="box">
+          HOLD <br/>
+          <div id="hold-shape">
+            ⬜🟩🟩 <br/>
+            🟩🟩⬜ <br/>
+          </div>
+        </div>
+        <div id="game-score" class="box">
+          SCORE <br/>
+          XXXX
+        </div>
+        <div id="game-level" class="box">
+          LEVEL <br/>
+          XXXX
+        </div>
+      </div>
+      <div id="game-middle" class="box">
+        <div id="board">
+          ⬛️⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜🟫🟫🟫⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜🟫⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          🟧🟧⬜⬜⬜🟩⬜🟦⬜⬜ <br/>
+          🟪🟧⬜⬜⬜🟩🟩🟦⬜⬜ <br/>
+          🟪🟧⬜🟫🟥🟥🟩🟦🟨🟨 <br/>
+          🟪🟪🟫🟫🟫🟥🟥🟦🟨🟨 <br/>
+        </div>
+      </div>
+      <div id="game-right">
+        <div id="game-next" class="box">
+          NEXT
+          <div id="next-shape">
+            🟫🟫🟫 <br/>
+            ⬜🟫⬜
+          </div>
+        </div>
+        <div id="game-instructions" class="box">
+          INSTRUCTIONS <br/>
+          ⬅️➡️ MOVE PIECE <br/>
+          ⬆️ ROTATE PIECE <br/>
+          ⬇️ DROP <br/>
+        </div>
+      </div>
+    </div>
+
+    <div id="end">
+      <span id="span-score"><h3>Score: </h3><h3 id="score">9999</h3></span>
+      <form id="form-name">
+        <input placeholder="NAME" autocomplete="off"/>
+      </form>
+
+      <form id="form-level">
+        <select id="change-level">
+          <option>Easy</option>
+          <option selected="selected">Medium</option> 
+          <!-- use selected="selected" on whatever the user's original choice is. -->
+          <option>Hard</option>
+        </select>
+
+        <button id="play-again">Play Again!</button>
+      </form>
+
+    </div>
+
   </body>
 </html>

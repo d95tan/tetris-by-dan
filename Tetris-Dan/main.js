@@ -1,24 +1,34 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+class GAME {
+    constructor(level) {
+        this.state = "start";
+        this.score = 0;
+        this.board = this.board();
+        this.next = 0;
+        this.hold = 0;
+        this.levelChoice = level;
+        this.currLevel = level;
+        this.holdEnabled = true;
+    }
+    
+    refreshDelay(level) {
+        return 1 / level;
+    }
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+    isMoveValid(futurePiece) {
+        // if board[futurepiece] not empty
+        // return false
+        // else return true
+        return true;
+    }
 
-setupCounter(document.querySelector('#counter'))
+    renderBoard(currentPiece) {
+
+    }
+}
+
+const LEVELS = {
+    easy: 10,
+    medium: 20,
+    hard: 25,
+}
+
