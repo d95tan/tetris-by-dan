@@ -50,6 +50,7 @@ h1 {
 
 h3 {
   margin: 0;
+  padding-bottom: 10px;;
 }
 
 button {
@@ -93,7 +94,7 @@ input, option {
 }
 
 #game {
-  display: flex;
+  display: none;
   flex-direction: row;
   justify-content: center;
   gap: 5px;
@@ -144,7 +145,7 @@ input, option {
 
 
 #end {
-  display:flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   gap: 15px;
