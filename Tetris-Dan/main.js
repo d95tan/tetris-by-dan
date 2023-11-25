@@ -1,10 +1,15 @@
 //* TESTING STUFF
 const dieButton = document.querySelector("#die");
 
-const currentPiece = {
-    pos: [[1,1],[1,2],[1,3],[1,4]],
-    emoji: "🟩",
-}
+// const currentPiece = {
+//     pos: [[1,1],[1,2],[1,3],[1,4]],
+//     emoji: "🟩",
+// }
+
+let currentPiece = new Oshape;
+
+//* SHAPE CLASSES
+import { Ishape, Jshape, Lshape, Oshape, Sshape, Zshape, Tshape } from "./shape-class";
 
 //* GLOBAL VARIABLES
 const LEVELS = {
@@ -123,9 +128,37 @@ class GAME {
     //! TODO: implement math.random function to pick piece
     //! also need to check if piece is blocked on spawn -> game over?
     newPiece(_this) {
+        switch (getRandomInt) {
+            case 0:
+                break;
+            
+            case 0:
+                break;
+            
+            case 0:
+                break;
+            
+            case 0:
+                break;
+            
+            case 0:
+                break;
+        }
         _this.currPiece.pos = currentPiece.pos.map(row => [...row]);
         _this.currPiece.emoji = currentPiece.emoji;
+        for (let yx of this.currPiece.pos) {
+            if (this.board[yx[0]+1][yx[1]] !== "⬜") {
+                console.log("Ded");
+                _this.state = "end";
+                return;
+            }
+        }
         return;
+    }
+
+    // returns an integer between 0 and 6 (inclusive)
+    getRandomInt() {
+        return Math.floor(Math.random() * 7);
     }
 
     scoreCalculator(n) {
