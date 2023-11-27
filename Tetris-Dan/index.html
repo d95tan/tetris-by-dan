@@ -90,7 +90,6 @@
           ⬇️ DROP <br/>
         </div>
       </div>
-      <button id="die">Test</button>
     </div>
 
     <div id="end">
@@ -101,10 +100,10 @@
 
       <form id="form-level">
         <select id="change-level">
-          <option>Easy</option>
-          <option selected="selected">Medium</option> 
+          <option value="easy" id="end-easy">Easy</option>
+          <option value="medium" id="end-medium">Medium</option> 
           <!-- use selected="selected" on whatever the user's original choice is. -->
-          <option>Hard</option>
+          <option value="hard" id="end-hard">Hard</option>
         </select>
 
         <button id="play-again">Play Again!</button>
