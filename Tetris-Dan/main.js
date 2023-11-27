@@ -1,13 +1,3 @@
-//* TESTING STUFF
-const dieButton = document.querySelector("#die");
-
-// const currentPiece = {
-//     pos: [[1,1],[1,2],[1,3],[1,4]],
-//     emoji: "🟩",
-// }
-
-// let currentPiece = new Oshape;
-
 //* SHAPE CLASSES
 import { Ishape, Jshape, Lshape, Oshape, Sshape, Zshape, Tshape } from "./shape-class";
 
@@ -45,9 +35,12 @@ const SCORE_TABLE = [ {
 //* GAME STATE
 
 class GAME {
-    constructor() {
-        dieButton.addEventListener("click", () => {console.log(this)});
-        this.state = "start";
+    constructor(state) {
+        this.state = state || "start";
+        this.reset();
+    }
+
+    reset() {
         this.score = 0;
         this.createBoard();
         this.renderBoard = this.renderBoard.bind(this); //omg ded
@@ -64,8 +57,8 @@ class GAME {
     }
     
     run() {
-        // console.log(this.refreshRate);
         this.intervalID = setInterval(this.isMoveDownValid.bind(this), this.refreshRate);
+        this.render();
     }
 
     getRefreshRate() {
@@ -87,7 +80,6 @@ class GAME {
         for (let yx of this.currPiece.pos) {
             this.board[yx[0]][yx[1]] = this.currPiece.emoji;
         }
-        // console.log("updatedBoard", this.board);
     }
 
     // Checks if piece can move down -
@@ -145,6 +137,7 @@ class GAME {
             this.hold.pos = structuredClone(this.hold.spawn);
             this.newPiece();
             this.holdEnabled = false;
+            this.render();
             return true;
         }
         else {
@@ -153,6 +146,7 @@ class GAME {
             this.hold = temp;
             this.hold.pos = structuredClone(this.hold.spawn);
             this.holdEnabled = false;
+            this.render();
             return true;
         }
     }
@@ -161,6 +155,9 @@ class GAME {
         document.addEventListener("keydown", (event) => {
             // console.log(event.key);
             if (event.key === "a" || event.key === "ArrowLeft") {
+                if (event.repeat) {
+                    return;
+                }
                 for (let yx of this.currPiece.pos) {
                     if (yx[1] === 0 || this.board[yx[0]][yx[1] - 1] !== "⬜") {
                         return;
@@ -169,6 +166,9 @@ class GAME {
                 this.moveLR(-1);
             }
             else if (event.key === "d" || event.key === "ArrowRight") {
+                if (event.repeat) {
+                    return;
+                }
                 for (let yx of this.currPiece.pos) {
                     if (yx[1] === DIMENSION[1] - 1 || this.board[yx[0]][yx[1] + 1] !== "⬜") {
                         return;
@@ -177,6 +177,9 @@ class GAME {
                 this.moveLR(1);
             }
             else if (event.key === "w" || event.key === "ArrowUp") {
+                if (event.repeat) {
+                    return;
+                }
                 if (this.currPiece.ref) {
                     let newPos = this.rotate();
                     for (let yx of newPos) {
@@ -195,9 +198,16 @@ class GAME {
                 this.hardDrop();
             }
             else if (event.key === "s") {
+                if (event.repeat) {
+                    return;
+                }
+                console.log("s");
                 this.softDrop();
             }
             else if (event.key === "c") {
+                if (event.repeat) {
+                    return;
+                }
                 this.storeHold();
             }
         });
@@ -207,6 +217,7 @@ class GAME {
         for (let yx of this.currPiece.pos) {
             yx[1] += x;
         }
+        this.render();
     }
 
     rotate() {
@@ -221,6 +232,7 @@ class GAME {
 
             pos.push([newY, newX]);
         }
+        this.render();
         return pos;
         
     }
@@ -283,7 +295,7 @@ class GAME {
         if (this.currPiece != 0) {
             for (let yx of this.currPiece.pos) {
                 if (this.board[yx[0] + 1][yx[1]] !== "⬜") {
-                    console.log("Ded");
+                    ("Ded");
                     this.state = "end";
                     return false;
                 }
@@ -313,7 +325,6 @@ class GAME {
         }
     }
 
-    //! Not sure if changing this.refreshRate affects game speed
     levelCalculator() {
         this.currLevel = this.levelChoice + Math.floor(this.lines / 10);
         this.getRefreshRate();
@@ -362,12 +373,17 @@ class GAME {
         levelBox.innerHTML = `LEVEL <br/> ${this.currLevel}`;
     }
 
-    renderNext() {
+    renderNext() {  
         nextBox.innerHTML = this.next.string;
     }
     
     renderHold() {
-        holdBox.innerHTML = this.hold.string;
+        if (this.hold === 0) {
+            holdBox.innerHTML = "";
+        }
+        else {
+            holdBox.innerHTML = this.hold.string;
+        }
     }
 
     levelSelector() {
@@ -384,32 +400,51 @@ class GAME {
             _this.levelChoice = LEVELS[level];
             _this.refreshRate = 1000 / LEVELS[level];
             _this.state = "game";
+            console.log(_this.currLevel)
+
+            for (let option of changeLevelOptions) {
+                option.setAttribute("selected", false);
+            }
+
+            document.querySelector(`#end-${level}`).setAttribute("selected", true);
+
             _this.run();
         }
     }
 }
 
+
 //* DOCUMENT ELEMENTS
+//* Start elements
 const easyButton = document.querySelector("#easy-button");
 const mediumButton = document.querySelector("#medium-button");
 const hardButton = document.querySelector("#hard-button");
-
+//* Game elements
 const boardEl = document.querySelector("#board")
 const holdBox = document.querySelector("#hold-shape");
 const nextBox = document.querySelector("#next-shape");
 const scoreBox = document.querySelector("#game-score");
 const levelBox = document.querySelector("#game-level");
-
+//* End elements
 const scoreEnd = document.querySelector("#score");
-
-//* EVENT LISTENERS
+const formName = document.querySelector("form-name");
+const formNameInput = document.querySelector("#form-name-input");
+const changeLevel = document.querySelector("#change-level");
+const formLevel = document.querySelector("#form-level");
+const changeLevelOptions = formLevel.children;
+const playAgainButton = document.querySelector("#play-again");
 
 
 //* FUNCTIONS
-
 function main() {
-    const tetris = new GAME();
-    tetris.render();
+    let tetris = new GAME();
+    playAgainButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        tetris = new GAME("game");
+        console.log(changeLevel.value);
+        tetris.setMode(tetris, changeLevel.value)();
+
+    })
 }
 
 main();
