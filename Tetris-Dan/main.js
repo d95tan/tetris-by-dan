@@ -1,3 +1,9 @@
+//! TODO:
+/* 
+Storage of highscores (potentially use browser cookies?)
+Pieces are instantly updated once there's a piece below them. Is there a way to not update them until the next tick?
+*/
+
 //* SHAPE CLASSES
 import { Ishape, Jshape, Lshape, Oshape, Sshape, Zshape, Tshape } from "./shape-class";
 
@@ -37,10 +43,6 @@ const SCORE_TABLE = [ {
 class GAME {
     constructor(state) {
         this.state = state || "start";
-        this.reset();
-    }
-
-    reset() {
         this.score = 0;
         this.createBoard();
         this.renderBoard = this.renderBoard.bind(this); //omg ded
@@ -56,15 +58,18 @@ class GAME {
         this.isActionValid();
     }
     
+    // Starts an interval based on refresh rate
     run() {
         this.intervalID = setInterval(this.isMoveDownValid.bind(this), this.refreshRate);
         this.render();
     }
 
-    getRefreshRate() {
+    // Updates this.refreshRate
+    updateRefreshRate() {
         this.refreshRate = 1000 / this.currLevel;
     }
 
+    // Creates empty board array based on dimensions
     createBoard() {
         this.board = [];
         for (let i = 0; i < DIMENSION[0]; i++) {
@@ -76,14 +81,18 @@ class GAME {
         }
     }
 
+    // updateBoard is only called when the current piece reaches its bottom position
+    // it will then update the existing board to include the current piece
     updateBoard() {
         for (let yx of this.currPiece.pos) {
             this.board[yx[0]][yx[1]] = this.currPiece.emoji;
         }
     }
 
-    // Checks if piece can move down -
-    // if cannot, will update this.board to include the currPiece
+    // Checks if piece can move down, and call moveDOWN if possible -
+    // if cannot, will call updateBoard to include the currPiece, call checkLines, and
+    // create new piece.
+    // if dead, then will render the end screen.
     // returns 0 when dead, 1 for piece locked, 2 for piece moving
     isMoveDownValid() {
         for (let yx of this.currPiece.pos) {
@@ -103,6 +112,7 @@ class GAME {
         return 2;
     }
 
+    // Moves current piece downwards by 1 row
     moveDOWN() {
         for (let yx of this.currPiece.pos) {
             yx[0]++;
@@ -110,14 +120,20 @@ class GAME {
         this.render();
     }
     
+    // keeps moving the currPiece down 1 row every 0.1s
+    // once down is released, the previous timer is stopped.
     softDrop() {
         let softDropInterval = setInterval(this.isMoveDownValid.bind(this), 100)
         
         document.addEventListener("keyup", (event) => {
-            clearInterval(softDropInterval);
+            if (event.key === "s" || event.key === "ArrowDown") {
+                clearInterval(softDropInterval);
+            }
         })
     }
 
+    // essentially same as above, just that a while loop is used for "instantaneous" drop
+    // makes use of return value from isMoveDownValid to break loop
     hardDrop() {
         while (true) {
             let falling = this.isMoveDownValid();
@@ -127,6 +143,9 @@ class GAME {
         }
     }
 
+    // adds hold functionality -
+    // resets the pos of hold so that it can spawn at the correct
+    // location when player re-spawns it.
     storeHold() {
         if (!this.holdEnabled) {
             return false;
@@ -151,9 +170,11 @@ class GAME {
         }
     }
 
+    // event listener for the player's keyboard inputs
+    // does the checking for left, right and rotation
+
     isActionValid() {
         document.addEventListener("keydown", (event) => {
-            // console.log(event.key);
             if (event.key === "a" || event.key === "ArrowLeft") {
                 if (event.repeat) {
                     return;
@@ -183,11 +204,11 @@ class GAME {
                 if (this.currPiece.ref) {
                     let newPos = this.rotate();
                     for (let yx of newPos) {
-                        if (this.board[yx[0]][yx[1] - 1] !== "⬜" ||
-                            yx[0] < 0 ||
+                        if (yx[0] < 0 ||
                             yx[0] >= DIMENSION[0] ||
                             yx[1] < 0 ||
-                            yx[1] >= DIMENSION[1]) {
+                            yx[1] >= DIMENSION[1] ||
+                            this.board[yx[0]][yx[1] - 1] !== "⬜") {
                             return;
                         }
                     }
@@ -197,11 +218,10 @@ class GAME {
             else if (event.key === " ") {
                 this.hardDrop();
             }
-            else if (event.key === "s") {
+            else if (event.key === "s" || event.key === "ArrowDown") {
                 if (event.repeat) {
                     return;
                 }
-                console.log("s");
                 this.softDrop();
             }
             else if (event.key === "c") {
@@ -213,6 +233,7 @@ class GAME {
         });
     }
 
+    // moves the currPiece in x direction
     moveLR(x) {
         for (let yx of this.currPiece.pos) {
             yx[1] += x;
@@ -220,6 +241,8 @@ class GAME {
         this.render();
     }
 
+    // unlike moveLR and moveDOWN, rotate does not modify the currPiece
+    // instead, it returns the rotated coordinates so that isActionValid can check if the move is valid
     rotate() {
         let refX = this.currPiece.pos[this.currPiece.ref][1];
         let refY = this.currPiece.pos[this.currPiece.ref][0];
@@ -237,6 +260,8 @@ class GAME {
         
     }
 
+    // whenever the board is updated, checkLines will call the neccessary functions
+    // to clear lines and update both score and level
     checkLines() {
         let clearedLines = 0;
         for (let i = 0; i < this.board.length; i++) {
@@ -252,6 +277,7 @@ class GAME {
         }
     }
 
+    // takes an input row index and clears it, then pushes a new blank line at the top
     clearLine(i) {
         this.board.splice(i,1);
         const newLine = [];
@@ -290,12 +316,11 @@ class GAME {
                 this.next = new Tshape;
                 break;
         }
-        // _this.currPiece.pos = currentPiece.pos.map(row => [...row]);
-        // _this.currPiece.emoji = currentPiece.emoji;
         if (this.currPiece != 0) {
             for (let yx of this.currPiece.pos) {
                 if (this.board[yx[0] + 1][yx[1]] !== "⬜") {
-                    ("Ded");
+                    this.updateBoard();
+                    this.render();
                     this.state = "end";
                     return false;
                 }
@@ -309,6 +334,7 @@ class GAME {
         return Math.floor(Math.random() * 7);
     }
 
+    // uses the score table to calculate and update the score.
     scoreCalculator(n) {
         let scoreLevel = this.currLevel;
         if (scoreLevel > 8) {
@@ -325,9 +351,11 @@ class GAME {
         }
     }
 
+    // level increases every 10 lines cleared.
+    // levelCalculator also stops the current interval timer and updates it with a new refresh rate.
     levelCalculator() {
         this.currLevel = this.levelChoice + Math.floor(this.lines / 10);
-        this.getRefreshRate();
+        this.updateRefreshRate();
         clearInterval(this.intervalID);
         this.run();
     }
@@ -344,7 +372,8 @@ class GAME {
     }
 
     renderBoard() {
-        let newBoard = this.board.map(row => [...row]); //help from chatgpt to find fastest way to deepcopy an array
+        // let newBoard = this.board.map(row => [...row]); //help from chatgpt to find fastest way to deepcopy an array
+        let newBoard = structuredClone(this.board)
         for (let yx of this.currPiece.pos) {
             newBoard[yx[0]][yx[1]] = this.currPiece.emoji;
         }
@@ -400,7 +429,6 @@ class GAME {
             _this.levelChoice = LEVELS[level];
             _this.refreshRate = 1000 / LEVELS[level];
             _this.state = "game";
-            console.log(_this.currLevel)
 
             for (let option of changeLevelOptions) {
                 option.setAttribute("selected", false);
@@ -441,7 +469,6 @@ function main() {
     playAgainButton.addEventListener("click", (event) => {
         event.preventDefault();
         tetris = new GAME("game");
-        console.log(changeLevel.value);
         tetris.setMode(tetris, changeLevel.value)();
 
     })
