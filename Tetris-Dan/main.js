@@ -53,21 +53,19 @@ class GAME {
         this.renderBoard = this.renderBoard.bind(this); //omg ded
         this.next = 0;
         this.hold = 0;
-        this.holdEnabled = false;
+        this.holdEnabled = true;
         this.levelSelector();
         this.levelChoice = 0;
         this.currLevel = 0;
         this.lines = 0;
-        this.currPiece = {};
-        this.newPiece(this);
+        this.newPiece();
+        this.newPiece();
         this.isActionValid();
-        this.softDrop();
-        this.hardDrop();
     }
     
     run() {
         // console.log(this.refreshRate);
-        intervalID = setInterval(this.isMoveDownValid.bind(this), this.refreshRate);
+        this.intervalID = setInterval(this.isMoveDownValid.bind(this), this.refreshRate);
     }
 
     getRefreshRate() {
@@ -92,26 +90,25 @@ class GAME {
         // console.log("updatedBoard", this.board);
     }
 
-    // Checks if piece can move down - 
+    // Checks if piece can move down -
     // if cannot, will update this.board to include the currPiece
+    // returns 0 when dead, 1 for piece locked, 2 for piece moving
     isMoveDownValid() {
         for (let yx of this.currPiece.pos) {
             if (yx[0] === DIMENSION[0] - 1 || this.board[yx[0]+1][yx[1]] !== "⬜") {
                 this.updateBoard();
                 this.checkLines();
-                if (this.newPiece(this)) {
-                    this.newPiece(this);
-                }
-                else {
-                    clearInterval(intervalID);
+                if (!this.newPiece()) { //dead
+                    clearInterval(this.intervalID);
                     this.render();
-                    return;
+                    return 0;
                 }
                 this.render();
-                return;
+                return 1;
             }
         }
         this.moveDOWN();
+        return 2;
     }
 
     moveDOWN() {
@@ -122,15 +119,43 @@ class GAME {
     }
     
     softDrop() {
-
+        let softDropInterval = setInterval(this.isMoveDownValid.bind(this), 100)
+        
+        document.addEventListener("keyup", (event) => {
+            clearInterval(softDropInterval);
+        })
     }
 
     hardDrop() {
+        while (true) {
+            let falling = this.isMoveDownValid();
+            if (falling === 0 || falling === 1) {
+                return;
+            }
+        }
+    }
 
+    storeHold() {
+        if (!this.holdEnabled) {
+            return false;
+        }
+
+        if (this.hold === 0) {
+            this.hold = this.currPiece;
+            this.newPiece();
+            return true;
+        }
+        else {
+            let temp = this.currPiece;
+            this.currPiece = this.hold;
+            this.hold = temp;
+            return true;
+        }
     }
 
     isActionValid() {
         document.addEventListener("keydown", (event) => {
+            // console.log(event.key);
             if (event.key === "a" || event.key === "ArrowLeft") {
                 for (let yx of this.currPiece.pos) {
                     if (yx[1] === 0 || this.board[yx[0]][yx[1] - 1] !== "⬜") {
@@ -148,17 +173,28 @@ class GAME {
                 this.moveLR(1);
             }
             else if (event.key === "w" || event.key === "ArrowUp") {
-                let newPos = this.rotate();
-                for (let yx of newPos) {
-                    if (this.board[yx[0]][yx[1] - 1] !== "⬜" ||
-                        yx[0] < 0 ||
-                        yx[0] >= DIMENSION[0] ||
-                        yx[1] < 0 ||
-                        yx[1] >= DIMENSION[1]) {
-                        return;
+                if (this.currPiece.ref) {
+                    let newPos = this.rotate();
+                    for (let yx of newPos) {
+                        if (this.board[yx[0]][yx[1] - 1] !== "⬜" ||
+                            yx[0] < 0 ||
+                            yx[0] >= DIMENSION[0] ||
+                            yx[1] < 0 ||
+                            yx[1] >= DIMENSION[1]) {
+                            return;
+                        }
                     }
+                    this.currPiece.pos = newPos;
                 }
-                this.currPiece.pos = newPos;
+            }
+            else if (event.key === " ") {
+                this.hardDrop();
+            }
+            else if (event.key === "s") {
+                this.softDrop();
+            }
+            else if (event.key === "c") {
+                this.storeHold();
             }
         });
     }
@@ -170,20 +206,19 @@ class GAME {
     }
 
     rotate() {
-        if (this.currPiece.ref) {
-            let refX = this.currPiece.pos[this.currPiece.ref][1];
-            let refY = this.currPiece.pos[this.currPiece.ref][0];
-            const pos = [];
-            for (let i = 0; i < this.currPiece.pos.length; i++) {
-                let [y, x] = this.currPiece.pos[i];
+        let refX = this.currPiece.pos[this.currPiece.ref][1];
+        let refY = this.currPiece.pos[this.currPiece.ref][0];
+        const pos = [];
+        for (let i = 0; i < this.currPiece.pos.length; i++) {
+            let [y, x] = this.currPiece.pos[i];
 
-                let newX = refX - (y - refY);
-                let newY = refY + (x - refX);
+            let newX = refX - (y - refY);
+            let newY = refY + (x - refX);
 
-                pos.push([newY, newX]);
-            }
-            return pos;
+            pos.push([newY, newX]);
         }
+        return pos;
+        
     }
 
     checkLines() {
@@ -213,37 +248,41 @@ class GAME {
 
     // Uses math.random to pick piece create new piece
     // also checks if piece is blocked on spawn -> game over
-    newPiece(_this) {
+    newPiece() {
+        this.currPiece = this.next;
+
         switch (this.getRandomInt()) {
             case 0:
-                this.currPiece = new Ishape;
+                this.next = new Ishape;
                 break;
             case 1:
-                this.currPiece = new Jshape;
+                this.next = new Jshape;
                 break;
             case 2:
-                this.currPiece = new Lshape;
+                this.next = new Lshape;
                 break;
             case 3:
-                this.currPiece = new Oshape;
+                this.next = new Oshape;
                 break;
             case 4:
-                this.currPiece = new Sshape;
+                this.next = new Sshape;
                 break;
             case 5:
-                this.currPiece = new Zshape;
+                this.next = new Zshape;
                 break;
             case 6:
-                this.currPiece = new Tshape;
+                this.next = new Tshape;
                 break;
         }
         // _this.currPiece.pos = currentPiece.pos.map(row => [...row]);
         // _this.currPiece.emoji = currentPiece.emoji;
-        for (let yx of this.currPiece.pos) {
-            if (this.board[yx[0]+1][yx[1]] !== "⬜") {
-                console.log("Ded");
-                this.state = "end";
-                return false;
+        if (this.currPiece != 0) {
+            for (let yx of this.currPiece.pos) {
+                if (this.board[yx[0] + 1][yx[1]] !== "⬜") {
+                    console.log("Ded");
+                    this.state = "end";
+                    return false;
+                }
             }
         }
         return true;
@@ -264,17 +303,18 @@ class GAME {
         }
         for (let tier of SCORE_TABLE) {
             if (tier["level"].includes(scoreLevel)) {
-                console.log(tier.points[n-1]);
                 this.score += tier.points[n - 1];
                 return;
             }
         }
     }
 
+    //! Not sure if changing this.refreshRate affects game speed
     levelCalculator() {
-        console.log("levelCalc", this);
         this.currLevel = this.levelChoice + Math.floor(this.lines / 10);
         this.getRefreshRate();
+        clearInterval(this.intervalID);
+        this.run();
     }
 
     //* RENDER FUNCTIONS
@@ -284,6 +324,8 @@ class GAME {
         this.renderBoard();
         this.renderScore();
         this.renderLevel();
+        this.renderNext();
+        this.renderHold();
     }
 
     renderBoard() {
@@ -309,12 +351,21 @@ class GAME {
 
     renderScore() {
         scoreBox.innerHTML = `SCORE <br/> ${this.score}`;
+        scoreEnd.innerText = this.score;
     }
 
     renderLevel() {
         levelBox.innerHTML = `LEVEL <br/> ${this.currLevel}`;
     }
+
+    renderNext() {
+        nextBox.innerHTML = this.next.string;
+    }
     
+    renderHold() {
+        holdBox.innerHTML = this.hold.string;
+    }
+
     levelSelector() {
         const _this = this;
         easyButton.addEventListener("click", this.setMode(_this, "easy"));
@@ -344,6 +395,8 @@ const holdBox = document.querySelector("#hold-shape");
 const nextBox = document.querySelector("#next-shape");
 const scoreBox = document.querySelector("#game-score");
 const levelBox = document.querySelector("#game-level");
+
+const scoreEnd = document.querySelector("#score");
 
 //* EVENT LISTENERS
 
