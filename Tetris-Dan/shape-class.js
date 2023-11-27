@@ -17,7 +17,7 @@ export class Ishape {
         let x = this.x;
         let y = this.y;
         this.pos = [[y,x-1],[y,x],[y,x+1],[y,x+2]];
-        this.spawn = this.pos;
+        this.spawn = structuredClone(this.pos);
         this.ref = 1;
         this.emoji = "🟦";
         this.string = "🟦🟦🟦🟦";
@@ -31,7 +31,7 @@ export class Jshape {
         let x = this.x;
         let y = this.y;
         this.pos = [[y-1,x-1],[y,x-1],[y,x],[y,x+1]];
-        this.spawn = this.pos;
+        this.spawn = structuredClone(this.pos);
         this.ref = 2;
         this.emoji = "🟫";
         this.string = "🟫⬜⬜<br/>🟫🟫🟫";
@@ -45,7 +45,7 @@ export class Lshape {
         let x = this.x;
         let y = this.y;
         this.pos = [[y - 1, x + 1], [y, x - 1], [y, x], [y, x + 1]];
-        this.spawn = this.pos;
+        this.spawn = structuredClone(this.pos);
         this.ref = 2;
         this.emoji = "🟧";
         this.string = "⬜⬜🟧<br/>🟧🟧🟧";
@@ -60,7 +60,7 @@ export class Oshape {
         let x = this.x;
         let y = this.y;
         this.pos = [[y,x],[y,x+1],[y+1,x],[y+1,x+1]];
-        this.spawn = this.pos;
+        this.spawn = structuredClone(this.pos);
         this.ref = false;
         this.emoji = "🟨";
         this.string = "🟨🟨<br/>🟨🟨";
@@ -74,7 +74,7 @@ export class Sshape {
         let x = this.x;
         let y = this.y;
         this.pos = [[y-1,x],[y-1,x+1],[y,x-1],[y,x]];
-        this.spawn = this.pos;
+        this.spawn = structuredClone(this.pos);
         this.ref = 3;
         this.emoji = "🟩";
         this.string = "⬜🟩🟩</br>🟩🟩⬜";
@@ -88,7 +88,7 @@ export class Zshape {
         let x = this.x;
         let y = this.y;
         this.pos = [[y-1,x-1],[y-1,x],[y,x],[y,x+1]];
-        this.spawn = this.pos;
+        this.spawn = structuredClone(this.pos);
         this.ref = 2;
         this.emoji = "🟥";
         this.string = "🟥🟥⬜<br/>⬜🟥🟥";
@@ -102,7 +102,7 @@ export class Tshape {
         let x = this.x;
         let y = this.y;
         this.pos = [[y-1,x],[y,x-1],[y,x],[y,x+1]];
-        this.spawn = this.pos;
+        this.spawn = structuredClone(this.pos);
         this.ref = 2;
         this.emoji = "🟪";
         this.string = "⬜🟪⬜<br/>🟪🟪🟪";
