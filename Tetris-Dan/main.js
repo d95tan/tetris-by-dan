@@ -142,13 +142,17 @@ class GAME {
 
         if (this.hold === 0) {
             this.hold = this.currPiece;
+            this.hold.pos = structuredClone(this.hold.spawn);
             this.newPiece();
+            this.holdEnabled = false;
             return true;
         }
         else {
             let temp = this.currPiece;
             this.currPiece = this.hold;
             this.hold = temp;
+            this.hold.pos = structuredClone(this.hold.spawn);
+            this.holdEnabled = false;
             return true;
         }
     }
@@ -250,7 +254,7 @@ class GAME {
     // also checks if piece is blocked on spawn -> game over
     newPiece() {
         this.currPiece = this.next;
-
+        this.holdEnabled = true;
         switch (this.getRandomInt()) {
             case 0:
                 this.next = new Ishape;
