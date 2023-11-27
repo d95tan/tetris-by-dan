@@ -6,12 +6,16 @@ const dieButton = document.querySelector("#die");
 //     emoji: "🟩",
 // }
 
-let currentPiece = new Oshape;
+// let currentPiece = new Oshape;
 
 //* SHAPE CLASSES
 import { Ishape, Jshape, Lshape, Oshape, Sshape, Zshape, Tshape } from "./shape-class";
 
 //* GLOBAL VARIABLES
+// Interval ID
+let intervalID; //https://www.tutorialrepublic.com/faq/how-to-stop-setinterval-call-in-javascript.php
+
+// Levels
 const LEVELS = {
     easy: 1,
     medium: 5,
@@ -37,37 +41,33 @@ const SCORE_TABLE = [ {
 }, {
     level: [8],
     points: [500,2000,4500,10000],
-}
-    
-]
+} ]
 //* GAME STATE
 
 class GAME {
     constructor() {
-        dieButton.addEventListener("click", this.run.bind(this));
-
+        dieButton.addEventListener("click", () => {console.log(this)});
         this.state = "start";
         this.score = 0;
         this.createBoard();
         this.renderBoard = this.renderBoard.bind(this); //omg ded
         this.next = 0;
         this.hold = 0;
-        this.holdEnabled = true;
+        this.holdEnabled = false;
         this.levelSelector();
         this.levelChoice = 0;
         this.currLevel = 0;
         this.lines = 0;
         this.currPiece = {};
         this.newPiece(this);
-
-        
+        this.isActionValid();
+        this.softDrop();
+        this.hardDrop();
     }
     
     run() {
-        let i = 0;
-        console.log(this.refreshRate)
-        setInterval(this.isMoveValid.bind(this), this.refreshRate)
-
+        // console.log(this.refreshRate);
+        intervalID = setInterval(this.isMoveDownValid.bind(this), this.refreshRate);
     }
 
     getRefreshRate() {
@@ -87,73 +87,166 @@ class GAME {
 
     updateBoard() {
         for (let yx of this.currPiece.pos) {
-            this.board[yx[0]][yx[1]] = currentPiece.emoji;
+            this.board[yx[0]][yx[1]] = this.currPiece.emoji;
         }
         // console.log("updatedBoard", this.board);
     }
 
-    isMoveValid() {
+    // Checks if piece can move down - 
+    // if cannot, will update this.board to include the currPiece
+    isMoveDownValid() {
         for (let yx of this.currPiece.pos) {
             if (yx[0] === DIMENSION[0] - 1 || this.board[yx[0]+1][yx[1]] !== "⬜") {
                 this.updateBoard();
                 this.checkLines();
-                this.newPiece(this);
+                if (this.newPiece(this)) {
+                    this.newPiece(this);
+                }
+                else {
+                    clearInterval(intervalID);
+                    this.render();
+                    return;
+                }
                 this.render();
                 return;
             }
         }
-        this.move();
+        this.moveDOWN();
     }
 
-    move() {
+    moveDOWN() {
         for (let yx of this.currPiece.pos) {
             yx[0]++;
         }
         this.render();
     }
     
+    softDrop() {
+
+    }
+
+    hardDrop() {
+
+    }
+
+    isActionValid() {
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "a" || event.key === "ArrowLeft") {
+                for (let yx of this.currPiece.pos) {
+                    if (yx[1] === 0 || this.board[yx[0]][yx[1] - 1] !== "⬜") {
+                        return;
+                    }
+                }
+                this.moveLR(-1);
+            }
+            else if (event.key === "d" || event.key === "ArrowRight") {
+                for (let yx of this.currPiece.pos) {
+                    if (yx[1] === DIMENSION[1] - 1 || this.board[yx[0]][yx[1] + 1] !== "⬜") {
+                        return;
+                    }    
+                }
+                this.moveLR(1);
+            }
+            else if (event.key === "w" || event.key === "ArrowUp") {
+                let newPos = this.rotate();
+                for (let yx of newPos) {
+                    if (this.board[yx[0]][yx[1] - 1] !== "⬜" ||
+                        yx[0] < 0 ||
+                        yx[0] >= DIMENSION[0] ||
+                        yx[1] < 0 ||
+                        yx[1] >= DIMENSION[1]) {
+                        return;
+                    }
+                }
+                this.currPiece.pos = newPos;
+            }
+        });
+    }
+
+    moveLR(x) {
+        for (let yx of this.currPiece.pos) {
+            yx[1] += x;
+        }
+    }
+
+    rotate() {
+        if (this.currPiece.ref) {
+            let refX = this.currPiece.pos[this.currPiece.ref][1];
+            let refY = this.currPiece.pos[this.currPiece.ref][0];
+            const pos = [];
+            for (let i = 0; i < this.currPiece.pos.length; i++) {
+                let [y, x] = this.currPiece.pos[i];
+
+                let newX = refX - (y - refY);
+                let newY = refY + (x - refX);
+
+                pos.push([newY, newX]);
+            }
+            return pos;
+        }
+    }
+
     checkLines() {
         let clearedLines = 0;
         for (let i = 0; i < this.board.length; i++) {
             if (!this.board[i].includes("⬜")) {
-                console.log("line",i,"cleared")
-                clearLine(i);
+                this.clearLine(i);
                 clearedLines++;
             }
         }
-        this.scoreCalculator(clearedLines);
-        this.levelCalculator;
+        
+        if (clearedLines > 0) {
+            this.scoreCalculator(clearedLines);
+            this.levelCalculator();
+        }
     }
 
-    //! TODO: implement math.random function to pick piece
-    //! also need to check if piece is blocked on spawn -> game over?
+    clearLine(i) {
+        this.board.splice(i,1);
+        const newLine = [];
+        for (let i = 0; i < DIMENSION[1]; i++) {
+            newLine.push("⬜");
+        }
+        this.board.unshift(newLine);
+        this.lines++;
+    }
+
+    // Uses math.random to pick piece create new piece
+    // also checks if piece is blocked on spawn -> game over
     newPiece(_this) {
-        switch (getRandomInt) {
+        switch (this.getRandomInt()) {
             case 0:
+                this.currPiece = new Ishape;
                 break;
-            
-            case 0:
+            case 1:
+                this.currPiece = new Jshape;
                 break;
-            
-            case 0:
+            case 2:
+                this.currPiece = new Lshape;
                 break;
-            
-            case 0:
+            case 3:
+                this.currPiece = new Oshape;
                 break;
-            
-            case 0:
+            case 4:
+                this.currPiece = new Sshape;
+                break;
+            case 5:
+                this.currPiece = new Zshape;
+                break;
+            case 6:
+                this.currPiece = new Tshape;
                 break;
         }
-        _this.currPiece.pos = currentPiece.pos.map(row => [...row]);
-        _this.currPiece.emoji = currentPiece.emoji;
+        // _this.currPiece.pos = currentPiece.pos.map(row => [...row]);
+        // _this.currPiece.emoji = currentPiece.emoji;
         for (let yx of this.currPiece.pos) {
             if (this.board[yx[0]+1][yx[1]] !== "⬜") {
                 console.log("Ded");
-                _this.state = "end";
-                return;
+                this.state = "end";
+                return false;
             }
         }
-        return;
+        return true;
     }
 
     // returns an integer between 0 and 6 (inclusive)
@@ -162,16 +255,16 @@ class GAME {
     }
 
     scoreCalculator(n) {
-        let scoreLevel;
-
-        if (this.level > 8) {
+        let scoreLevel = this.currLevel;
+        if (scoreLevel > 8) {
             scoreLevel = 8;
         }
         else {
-            scoreLevel = this.level;
+            scoreLevel = this.currLevel;
         }
         for (let tier of SCORE_TABLE) {
-            if (scoreLevel in tier.level) {
+            if (tier["level"].includes(scoreLevel)) {
+                console.log(tier.points[n-1]);
                 this.score += tier.points[n - 1];
                 return;
             }
@@ -179,6 +272,7 @@ class GAME {
     }
 
     levelCalculator() {
+        console.log("levelCalc", this);
         this.currLevel = this.levelChoice + Math.floor(this.lines / 10);
         this.getRefreshRate();
     }
@@ -225,7 +319,7 @@ class GAME {
         const _this = this;
         easyButton.addEventListener("click", this.setMode(_this, "easy"));
         mediumButton.addEventListener("click", this.setMode(_this, "medium"));
-        hardButton.addEventListener("click", this.setMode(_this, "hard"))
+        hardButton.addEventListener("click", this.setMode(_this, "hard"));
     }
 
     setMode = (_this, level) => {
@@ -235,7 +329,7 @@ class GAME {
             _this.levelChoice = LEVELS[level];
             _this.refreshRate = 1000 / LEVELS[level];
             _this.state = "game";
-            _this.render()
+            _this.run();
         }
     }
 }
