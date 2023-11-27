@@ -8,8 +8,6 @@
 //? 🟪 T
 //? coordinates [y][x]
 
-//? I Shape origin is outside the shape...
-//! TODO: solve rotation
 export class Ishape {
     constructor() {
         this.x = 4;
@@ -53,7 +51,6 @@ export class Lshape {
 }
 
 export class Oshape {
-    //O Shape has no rotation
     constructor() {
         this.x = 4;
         this.y = 0;
@@ -61,7 +58,7 @@ export class Oshape {
         let y = this.y;
         this.pos = [[y,x],[y,x+1],[y+1,x],[y+1,x+1]];
         this.spawn = structuredClone(this.pos);
-        this.ref = false;
+        this.ref = false;   //O Shape has no rotation
         this.emoji = "🟨";
         this.string = "🟨🟨<br/>🟨🟨";
     }
