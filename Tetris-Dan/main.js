@@ -172,7 +172,6 @@ class GAME {
 
     // event listener for the player's keyboard inputs
     // does the checking for left, right and rotation
-
     isActionValid() {
         document.addEventListener("keydown", (event) => {
             if (event.key === "a" || event.key === "ArrowLeft") {
