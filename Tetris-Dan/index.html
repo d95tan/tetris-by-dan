@@ -26,10 +26,32 @@
         <button id="hard-button">Hard</button>
       </form>
       <div id="highscores">
-        <h3>Highscores:</h3>
-        <span class="top5"><p>Dan</p><p>9999</p></span>
+        <h3>Highscores</h3>
+        <table>
+          <tr>
+            <td class="top5 name5" id="name1">.....</td>
+            <td class="top5 score5" id="score1">5000</td>
+          </tr>
+          <tr>
+            <td class="top5 name5" id="name2">.....</td>
+            <td class="top5 score5" id="score2">4000</td>
+          </tr>
+          <tr>
+            <td class="top5 name5" id="name3">.....</td>
+            <td class="top5 score5" id="score3">3000</td>
+          </tr>
+          <tr>
+            <td class="top5 name5" id="name4">.....</td>
+            <td class="top5 score5" id="score4">2000</td>
+          </tr>
+          <tr>
+            <td class="top5 name5" id="name5">.....</td>
+            <td class="top5 score5" id="score5">1000</td>
+          </tr>
+        </table>
+        <!-- <span class="top5"><p>Dan</p><p>9999</p></span>
         <span class="top5"><p>Stanley</p><p>8000</p></span>
-        <span class="top5"><p>Donald Trump</p><p>7</p></span>
+        <span class="top5"><p>Donald Trump</p><p>7</p></span> -->
       </div>
     </div>
     
@@ -38,8 +60,6 @@
         <div id="game-hold" class="box">
           HOLD <br/>
           <div id="hold-shape">
-            ⬜🟩🟩 <br/>
-            🟩🟩⬜ <br/>
           </div>
         </div>
         <div id="game-score" class="box">
@@ -60,8 +80,6 @@
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
-          ⬜⬜⬜⬜⬜🟫🟫🟫⬜⬜ <br/>
-          ⬜⬜⬜⬜⬜⬜🟫⬜⬜⬜ <br/>
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
@@ -69,25 +87,26 @@
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
           ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
-          🟧🟧⬜⬜⬜🟩⬜🟦⬜⬜ <br/>
-          🟪🟧⬜⬜⬜🟩🟩🟦⬜⬜ <br/>
-          🟪🟧⬜🟫🟥🟥🟩🟦🟨🟨 <br/>
-          🟪🟪🟫🟫🟫🟥🟥🟦🟨🟨 <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
+          ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ <br/>
         </div>
       </div>
       <div id="game-right">
         <div id="game-next" class="box">
           NEXT
           <div id="next-shape">
-            🟫🟫🟫 <br/>
-            ⬜🟫⬜
           </div>
         </div>
         <div id="game-instructions" class="box">
           INSTRUCTIONS <br/>
-          ⬅️➡️ MOVE PIECE <br/>
-          ⬆️ ROTATE PIECE <br/>
-          ⬇️ DROP <br/>
+          ⬅️➡️ MOVE <br/>
+          ⬆️ ROTATE <br/>
+          <img class="fake-emoji" src="./public/Space icon.png"/>⬇️ DROP <br/>
+          <img class="fake-emoji" src="./public/C icon.png"/> HOLD <br/>
         </div>
       </div>
     </div>

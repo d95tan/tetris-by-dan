@@ -51,7 +51,7 @@ h1 {
 
 h3 {
   margin: 0;
-  padding-bottom: 10px;;
+  padding-bottom: 10px;
 }
 
 button {
@@ -84,16 +84,36 @@ input, option {
   align-items: center;
 }
 
+table {
+  width: 150px;
+}
+
 #highscores {
-  padding-top: 3%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 3%;
+  padding: .1%;
+  background-color: #f8f8f8;
 }
 
 .top5 {
   font-size: smaller;
+  justify-content: space-between;
+  line-height: 1.1;
+
+}
+
+.score5 {
+  text-align: right;
+}
+
+/* .top5 {
+  font-size: smaller;
   display: flex;
   justify-content: space-between;
   line-height: 0.1;
-}
+} */
 
 #game {
   display: none;
@@ -136,6 +156,13 @@ input, option {
 
 #game-score, #game-level {
   aspect-ratio: 2/1;
+}
+
+.fake-emoji {
+  order: -1;
+  height: 1em;
+  margin-bottom: 0.3em;
+  margin-right: 0.1em;
 }
 
 #game-middle {
