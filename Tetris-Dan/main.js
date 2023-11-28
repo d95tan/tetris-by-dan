@@ -14,10 +14,7 @@ import { Ishape, Jshape, Lshape, Oshape, Sshape, Zshape, Tshape } from "./shape-
 
 //* GLOBAL VARIABLES
 // Cookies
-const cookies = {
-    readCookies: 0,
-    writeCookies: 0,
-}
+let HIGHSCORE = [];
 
 // Levels
 const LEVELS = {
@@ -76,7 +73,7 @@ class GAME {
 
     // Sets mode based on button pressed
     setMode = (_this, level) => {
-        return function (event) {
+        return function () {
             event.preventDefault();
             _this.currLevel = LEVELS[level];
             _this.levelChoice = LEVELS[level];
@@ -348,6 +345,7 @@ class GAME {
             for (let yx of this.currPiece.pos) {
                 if (this.board[yx[0] + 1][yx[1]] !== "⬜") {
                     this.updateBoard();
+                    this.checkHighscore();
                     this.render();
                     this.state = "end";
                     return false;
@@ -386,6 +384,32 @@ class GAME {
         this.updateRefreshRate();
         clearInterval(this.intervalID);
         this.run();
+    }
+
+    checkHighscore() {
+        if (this.score >= HIGHSCORE[4].score) {
+            formName.style.display = "flex";
+            endHighscore.style.display = "none";
+            this.insertHighscore()
+        }
+    }
+    
+    insertHighscore() {
+        nameButton.addEventListener("click", () => {
+            event.preventDefault();
+            for (let i = 0; i < HIGHSCORE.length; i++) {
+                if (this.score >= HIGHSCORE[i].score) {
+                    HIGHSCORE.splice(i, 0, { name: formNameInput.value, score: this.score });
+                    HIGHSCORE.pop();
+                    formNameInput.value = "";
+                    formName.style.display = "none"
+                    generateHighScoreTable();
+                    endHighscore.style.display = "flex";
+                    localStorage.setItem("highscores",JSON.stringify(HIGHSCORE));
+                    break;
+                }
+            }
+        })
     }
 
     //* RENDER FUNCTIONS
@@ -458,8 +482,10 @@ const scoreBox = document.querySelector("#game-score");
 const levelBox = document.querySelector("#game-level");
 //* End elements
 const scoreEnd = document.querySelector("#score");
-const formName = document.querySelector("form-name");
+const formName = document.querySelector("#form-name");
 const formNameInput = document.querySelector("#form-name-input");
+const nameButton = document.querySelector("#name-button");
+const endHighscore = document.querySelector("#end-highscores");
 const changeLevel = document.querySelector("#change-level");
 const formLevel = document.querySelector("#form-level");
 const changeLevelOptions = formLevel.children;
@@ -467,23 +493,37 @@ const playAgainButton = document.querySelector("#play-again");
 
 
 //* FUNCTIONS
-function readCookies() {
-    const twoWeeksDate = new Date(Date.UTC(0, 0, 14, 0, 0, 0, Date.now()));
-
-    cookies.readCookies = structuredClone(document.cookie);
-    if (cookies.readCookies) {
-        cookies.writeCookies = structuredClone(cookies.readCookies);
+function getHighScore() {
+    const blankHiScore = ([{ name: ".....", score: 5000 },
+        { name: ".....", score: 4000 },
+        { name: ".....", score: 3000 },
+        { name: ".....", score: 2000 },
+        { name: ".....", score: 1000 }]);
+    
+    const highscoreStr = localStorage.getItem("highscores");
+    if (!highscoreStr) {
+        HIGHSCORE = structuredClone(blankHiScore);
     }
     else {
-        cookies.writeCookies = `expires=${twoWeeksDate}; highscore={}`;
+        HIGHSCORE = JSON.parse(highscoreStr);
     }
-    console.log("Existing cookie:", cookies.readCookies);
-    console.log("Write cookie:", cookies.writeCookies);
+    generateHighScoreTable();
+}
+
+function generateHighScoreTable() {
+    for (let i = 0; i < HIGHSCORE.length; i++) {
+        document.querySelector(`#name${i + 1}`).innerText = HIGHSCORE[i].name;
+        document.querySelector(`#score${i + 1}`).innerText = HIGHSCORE[i].score;
+        document.querySelector(`#end-name${i + 1}`).innerText = HIGHSCORE[i].name;
+        document.querySelector(`#end-score${i + 1}`).innerText = HIGHSCORE[i].score;
+    }
 }
 
 function main() {
-    readCookies();
+    getHighScore();
     let tetris = new GAME();
+
+    // play again functionality
     playAgainButton.addEventListener("click", (event) => {
         event.preventDefault();
         formNameInput.setAttribute("autofocus", false);
