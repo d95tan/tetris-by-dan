@@ -1,15 +1,23 @@
-//! TODO:
-/* 
-Storage of highscores (potentially use browser cookies?)
-Pieces are instantly updated once there's a piece below them. Is there a way to not update them until the next tick?
+
+/**
+* TODO: Storage of highscores (potentially use browser cookies?)
+**/
+
+/**  
+ * References: 
+ * General rules, mechanics etc: https://tetris.wiki/Tetris_Guideline
+ * Rotation matrix: https://en.wikipedia.org/wiki/Rotation_matrix
 */
 
 //* SHAPE CLASSES
 import { Ishape, Jshape, Lshape, Oshape, Sshape, Zshape, Tshape } from "./shape-class";
 
 //* GLOBAL VARIABLES
-// Interval ID
-let intervalID; //https://www.tutorialrepublic.com/faq/how-to-stop-setinterval-call-in-javascript.php
+// Cookies
+const cookies = {
+    readCookies: 0,
+    writeCookies: 0,
+}
 
 // Levels
 const LEVELS = {
@@ -19,7 +27,7 @@ const LEVELS = {
 }
 
 // Size of board
-const DIMENSION = [20, 10]; // height, width
+const DIMENSION = [20, 10]; // [height, width]
 
 // Score table references Original Sega scoring system
 const SCORE_TABLE = [ {
@@ -37,9 +45,9 @@ const SCORE_TABLE = [ {
 }, {
     level: [8],
     points: [500,2000,4500,10000],
-} ]
-//* GAME STATE
+    }]
 
+//* GAME STATE
 class GAME {
     constructor(state) {
         this.state = state || "start";
@@ -57,10 +65,37 @@ class GAME {
         this.newPiece();
         this.isActionValid();
     }
-    
+
+    // Adds event listeners to level buttons
+    levelSelector() {
+        const _this = this;
+        easyButton.addEventListener("click", this.setMode(_this, "easy"));
+        mediumButton.addEventListener("click", this.setMode(_this, "medium"));
+        hardButton.addEventListener("click", this.setMode(_this, "hard"));
+    }
+
+    // Sets mode based on button pressed
+    setMode = (_this, level) => {
+        return function (event) {
+            event.preventDefault();
+            _this.currLevel = LEVELS[level];
+            _this.levelChoice = LEVELS[level];
+            _this.refreshRate = 1000 / LEVELS[level];
+            _this.state = "game";
+
+            for (let option of changeLevelOptions) {
+                option.setAttribute("selected", false);
+            }
+
+            document.querySelector(`#end-${level}`).setAttribute("selected", true);
+
+            _this.run();
+        }
+    }
+
     // Starts an interval based on refresh rate
     run() {
-        this.intervalID = setInterval(this.isMoveDownValid.bind(this), this.refreshRate);
+        this.intervalID = setInterval(this.isMoveDownValid.bind(this), this.refreshRate); // ref: https://www.tutorialrepublic.com/faq/how-to-stop-setinterval-call-in-javascript.php
         this.render();
     }
 
@@ -175,9 +210,6 @@ class GAME {
     isActionValid() {
         document.addEventListener("keydown", (event) => {
             if (event.key === "a" || event.key === "ArrowLeft") {
-                if (event.repeat) {
-                    return;
-                }
                 for (let yx of this.currPiece.pos) {
                     if (yx[1] === 0 || this.board[yx[0]][yx[1] - 1] !== "⬜") {
                         return;
@@ -186,9 +218,6 @@ class GAME {
                 this.moveLR(-1);
             }
             else if (event.key === "d" || event.key === "ArrowRight") {
-                if (event.repeat) {
-                    return;
-                }
                 for (let yx of this.currPiece.pos) {
                     if (yx[1] === DIMENSION[1] - 1 || this.board[yx[0]][yx[1] + 1] !== "⬜") {
                         return;
@@ -287,7 +316,7 @@ class GAME {
         this.lines++;
     }
 
-    // Uses math.random to pick piece create new piece
+    // Uses math.random to pick piece create new piece (true random vs psuedo random)
     // also checks if piece is blocked on spawn -> game over
     newPiece() {
         this.currPiece = this.next;
@@ -328,7 +357,7 @@ class GAME {
         return true;
     }
 
-    // returns an integer between 0 and 6 (inclusive)
+    // returns an integer between 0 and 6 (both inclusive)
     getRandomInt() {
         return Math.floor(Math.random() * 7);
     }
@@ -360,7 +389,6 @@ class GAME {
     }
 
     //* RENDER FUNCTIONS
-    
     render() {
         this.renderStates();
         this.renderBoard();
@@ -371,8 +399,8 @@ class GAME {
     }
 
     renderBoard() {
-        // let newBoard = this.board.map(row => [...row]); //help from chatgpt to find fastest way to deepcopy an array
-        let newBoard = structuredClone(this.board)
+        // let newBoard = this.board.map(row => [...row]);  // help from chatgpt to find fastest way to deepcopy an array
+        let newBoard = structuredClone(this.board)          // found a better way to deepcopy an array
         for (let yx of this.currPiece.pos) {
             newBoard[yx[0]][yx[1]] = this.currPiece.emoji;
         }
@@ -414,32 +442,8 @@ class GAME {
         }
     }
 
-    levelSelector() {
-        const _this = this;
-        easyButton.addEventListener("click", this.setMode(_this, "easy"));
-        mediumButton.addEventListener("click", this.setMode(_this, "medium"));
-        hardButton.addEventListener("click", this.setMode(_this, "hard"));
-    }
-
-    setMode = (_this, level) => {
-        return function () {
-            event.preventDefault();
-            _this.currLevel = LEVELS[level];
-            _this.levelChoice = LEVELS[level];
-            _this.refreshRate = 1000 / LEVELS[level];
-            _this.state = "game";
-
-            for (let option of changeLevelOptions) {
-                option.setAttribute("selected", false);
-            }
-
-            document.querySelector(`#end-${level}`).setAttribute("selected", true);
-
-            _this.run();
-        }
-    }
+    
 }
-
 
 //* DOCUMENT ELEMENTS
 //* Start elements
@@ -463,13 +467,30 @@ const playAgainButton = document.querySelector("#play-again");
 
 
 //* FUNCTIONS
+function readCookies() {
+    const twoWeeksDate = new Date(Date.UTC(0, 0, 14, 0, 0, 0, Date.now()));
+
+    cookies.readCookies = structuredClone(document.cookie);
+    if (cookies.readCookies) {
+        cookies.writeCookies = structuredClone(cookies.readCookies);
+    }
+    else {
+        cookies.writeCookies = `expires=${twoWeeksDate}; highscore={}`;
+    }
+    console.log("Existing cookie:", cookies.readCookies);
+    console.log("Write cookie:", cookies.writeCookies);
+}
+
 function main() {
+    readCookies();
     let tetris = new GAME();
     playAgainButton.addEventListener("click", (event) => {
         event.preventDefault();
+        formNameInput.setAttribute("autofocus", false);
+        changeLevel.setAttribute("autofocus", false);
+        playAgainButton.setAttribute("autofocus", false);
         tetris = new GAME("game");
         tetris.setMode(tetris, changeLevel.value)();
-
     })
 }
 
