@@ -1,6 +1,6 @@
 
 /**
-* TODO: Storage of highscores (potentially use browser cookies?)
+* TODO: 
 **/
 
 /**  
