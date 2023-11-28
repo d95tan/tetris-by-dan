@@ -29,29 +29,26 @@
         <h3>Highscores</h3>
         <table>
           <tr>
-            <td class="top5 name5" id="name1">.....</td>
-            <td class="top5 score5" id="score1">5000</td>
+            <td class="top5 name5" id="name1"></td>
+            <td class="top5 score5" id="score1"></td>
           </tr>
           <tr>
-            <td class="top5 name5" id="name2">.....</td>
-            <td class="top5 score5" id="score2">4000</td>
+            <td class="top5 name5" id="name2"></td>
+            <td class="top5 score5" id="score2"></td>
           </tr>
           <tr>
-            <td class="top5 name5" id="name3">.....</td>
-            <td class="top5 score5" id="score3">3000</td>
+            <td class="top5 name5" id="name3"></td>
+            <td class="top5 score5" id="score3"></td>
           </tr>
           <tr>
-            <td class="top5 name5" id="name4">.....</td>
-            <td class="top5 score5" id="score4">2000</td>
+            <td class="top5 name5" id="name4"></td>
+            <td class="top5 score5" id="score4"></td>
           </tr>
           <tr>
-            <td class="top5 name5" id="name5">.....</td>
-            <td class="top5 score5" id="score5">1000</td>
+            <td class="top5 name5" id="name5"></td>
+            <td class="top5 score5" id="score5"></td>
           </tr>
         </table>
-        <!-- <span class="top5"><p>Dan</p><p>9999</p></span>
-        <span class="top5"><p>Stanley</p><p>8000</p></span>
-        <span class="top5"><p>Donald Trump</p><p>7</p></span> -->
       </div>
     </div>
     
@@ -103,20 +100,17 @@
         </div>
         <div id="game-instructions" class="box">
           INSTRUCTIONS <br/>
-          <img class="fake-emoji" src="./public/Left arrow.png"/><img class="fake-emoji" src="./public/Right Arrow.png"/> MOVE <br/>
-          <img class="fake-emoji" src="./public/Up Arrow.png"/> ROTATE <br/>
-          <img class="fake-emoji" src="./public/Space icon.png"/><img class="fake-emoji" src="./public/Down Arrow.png"/> DROP <br/>
-          <img class="fake-emoji" src="./public/C icon.png"/> HOLD <br/>
+          <img class="fake-emoji" src="./Left arrow.png"/><img class="fake-emoji" src="./Right Arrow.png"/> MOVE <br/>
+          <img class="fake-emoji" src="./Up Arrow.png"/> ROTATE <br/>
+          <img class="fake-emoji" src="./Space icon.png"/><img class="fake-emoji" src="./Down Arrow.png"/> DROP <br/>
+          <img class="fake-emoji" src="./C icon.png"/> HOLD <br/>
         </div>
       </div>
     </div>
 
     <div id="end">
       <span id="span-score"><h3>Score: </h3><h3 id="score">9999</h3></span>
-      <form id="form-name">
-        <input id = "form-name-input" placeholder="NAME" autocomplete="off"/>
-      </form>
-
+      
       <form id="form-level">
         <select id="change-level">
           <option value="easy" id="end-easy">Easy</option>
@@ -124,10 +118,40 @@
           <!-- use selected="selected" on whatever the user's original choice is. -->
           <option value="hard" id="end-hard">Hard</option>
         </select>
-
+        
         <button id="play-again">Play Again!</button>
       </form>
+      
+      <form id="form-name">
+        <input id = "form-name-input" placeholder="NAME" autocomplete="off"/>
+        <button id="name-button">Submit</button>
+      </form>
 
+      <div id="end-highscores">
+        <h3>Highscores</h3>
+        <table>
+          <tr>
+            <td class="top5 name5" id="end-name1"></td>
+            <td class="top5 score5" id="end-score1"></td>
+          </tr>
+          <tr>
+            <td class="top5 name5" id="end-name2"></td>
+            <td class="top5 score5" id="end-score2"></td>
+          </tr>
+          <tr>
+            <td class="top5 name5" id="end-name3"></td>
+            <td class="top5 score5" id="end-score3"></td>
+          </tr>
+          <tr>
+            <td class="top5 name5" id="end-name4"></td>
+            <td class="top5 score5" id="end-score4"></td>
+          </tr>
+          <tr>
+            <td class="top5 name5" id="end-name5"></td>
+            <td class="top5 score5" id="end-score5"></td>
+          </tr>
+        </table>
+      </div>
     </div>
     <footer>
       <p id="copyright">© 2023 by Dan</p>
