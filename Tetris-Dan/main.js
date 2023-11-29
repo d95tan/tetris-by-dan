@@ -1,6 +1,6 @@
 
 /**
-* TODO: 
+* 
 **/
 
 /**  
@@ -175,6 +175,153 @@ class GAME {
         }
     }
 
+    // event listener for the player's keyboard inputs
+    // does the checking for left, right and rotation
+    isActionValid() {
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "a" || event.key === "ArrowLeft") {
+                this.isMoveLRValid(-1,true);
+            }
+            else if (event.key === "d" || event.key === "ArrowRight") {
+                this.isMoveLRValid(1,true);
+            }
+            else if (event.key === "w" || event.key === "ArrowUp") {
+                if (event.repeat) {
+                    return;
+                }
+                if (this.currPiece.ref) {
+                    this.rotate();
+                    let rotate = true;
+                    for (let yx of this.tempPos) {
+                        if (yx[0] < 0) {                                // piece is at top (seldom an issue) 
+                            return;
+                        }
+                        else if (yx[1] < 0) {                           // piece is at left border
+                            if (!this.isMoveLRValid(1, false)) {
+                                if (!this.isMoveLRValid(2,false)) {
+                                    return;
+                                }
+                                return;
+                            }
+                            return;
+                        }
+                        else if (yx[1] >= DIMENSION[1]) {               // piece is at right border
+                            if (!this.isMoveLRValid(-1, false)) {
+                                if (!this.isMoveLRValid(-2,false)) {
+                                    return;
+                                }
+                                return;
+                            }
+                            return;
+                        } 
+                        else if (yx[0] >= DIMENSION[0]) {               // piece is at bottom
+                            if (!this.isMoveUpValid()) {
+                                return;
+                            }
+                            return;
+                        }
+                        else if (this.board[yx[0]][yx[1]] !== "⬜") {
+                            rotate = false;
+                        }
+                    }
+                    if (rotate) {
+                        this.currPiece.pos = structuredClone(this.tempPos);
+                        this.render();
+                    }
+                }
+            }
+            else if (event.key === " ") {
+                this.hardDrop();
+            }
+            else if (event.key === "s" || event.key === "ArrowDown") {
+                if (event.repeat) {
+                    return;
+                }
+                this.softDrop();
+            }
+            else if (event.key === "c") {
+                if (event.repeat) {
+                    return;
+                }
+                this.storeHold();
+            }
+        });
+    }
+    
+    isMoveLRValid(x, isCurrPiece) {
+        let y;
+        let pos = [];
+
+        if (x > 0) {
+            y = DIMENSION[1];
+        }
+        else {
+            y = 0;
+        }
+
+        if (isCurrPiece) {
+            pos = structuredClone(this.currPiece.pos);
+        }
+        else {
+            pos = structuredClone(this.tempPos);
+        }
+
+        for (let yx of pos) {
+            if (yx[1] === y || this.board[yx[0]][yx[1] + x] !== "⬜") {
+                return false;
+            }
+        }
+        this.currPiece.pos = structuredClone(pos);
+        this.moveLR(x);
+        return true;
+    }
+
+    // moves the currPiece in x direction
+    moveLR(x) {
+        for (let yx of this.currPiece.pos) {
+            yx[1] += x;
+        }
+        this.render();
+    }
+
+    isMoveUpValid() {
+        let y = 1;
+        for (let yx of this.tempPos) {
+            if (yx[0] - 1 >= DIMENSION[0] || this.board[yx[0] - 1][yx[1]] !== "⬜") {
+                if (yx[0] - 2 >= DIMENSION[0] ||this.board[yx[0] - 2][yx[1]] !== "⬜") {
+                    return false;
+                }
+                else {
+                    y = 2;
+                }
+            }
+        }
+        this.moveUp(y);
+    }
+
+    moveUp(y) {
+        for (let yx of this.tempPos) {
+            yx[0] -= y;
+        }
+        this.currPiece.pos = structuredClone(this.tempPos);
+        this.render();
+    }
+
+    // unlike moveLR and moveDOWN, rotate does not modify the currPiece
+    // instead, it stores the rotated coordinates so that isActionValid can check if the move is valid
+    rotate() {
+        let refX = this.currPiece.pos[this.currPiece.ref][1];
+        let refY = this.currPiece.pos[this.currPiece.ref][0];
+        this.tempPos = [];
+        for (let i = 0; i < this.currPiece.pos.length; i++) {
+            let [y, x] = structuredClone(this.currPiece.pos[i]);
+
+            let newX = refX - (y - refY);
+            let newY = refY + (x - refX);
+            this.tempPos.push([newY, newX]);
+        }
+    }
+    
     // adds hold functionality -
     // resets the pos of hold so that it can spawn at the correct
     // location when player re-spawns it.
@@ -200,89 +347,6 @@ class GAME {
             this.render();
             return true;
         }
-    }
-
-    // event listener for the player's keyboard inputs
-    // does the checking for left, right and rotation
-    isActionValid() {
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "a" || event.key === "ArrowLeft") {
-                for (let yx of this.currPiece.pos) {
-                    if (yx[1] === 0 || this.board[yx[0]][yx[1] - 1] !== "⬜") {
-                        return;
-                    }
-                }
-                this.moveLR(-1);
-            }
-            else if (event.key === "d" || event.key === "ArrowRight") {
-                for (let yx of this.currPiece.pos) {
-                    if (yx[1] === DIMENSION[1] - 1 || this.board[yx[0]][yx[1] + 1] !== "⬜") {
-                        return;
-                    }    
-                }
-                this.moveLR(1);
-            }
-            else if (event.key === "w" || event.key === "ArrowUp") {
-                if (event.repeat) {
-                    return;
-                }
-                if (this.currPiece.ref) {
-                    let newPos = this.rotate();
-                    for (let yx of newPos) {
-                        if (yx[0] < 0 ||
-                            yx[0] >= DIMENSION[0] ||
-                            yx[1] < 0 ||
-                            yx[1] >= DIMENSION[1] ||
-                            this.board[yx[0]][yx[1] - 1] !== "⬜") {
-                            return;
-                        }
-                    }
-                    this.currPiece.pos = newPos;
-                }
-            }
-            else if (event.key === " ") {
-                this.hardDrop();
-            }
-            else if (event.key === "s" || event.key === "ArrowDown") {
-                if (event.repeat) {
-                    return;
-                }
-                this.softDrop();
-            }
-            else if (event.key === "c") {
-                if (event.repeat) {
-                    return;
-                }
-                this.storeHold();
-            }
-        });
-    }
-
-    // moves the currPiece in x direction
-    moveLR(x) {
-        for (let yx of this.currPiece.pos) {
-            yx[1] += x;
-        }
-        this.render();
-    }
-
-    // unlike moveLR and moveDOWN, rotate does not modify the currPiece
-    // instead, it returns the rotated coordinates so that isActionValid can check if the move is valid
-    rotate() {
-        let refX = this.currPiece.pos[this.currPiece.ref][1];
-        let refY = this.currPiece.pos[this.currPiece.ref][0];
-        const pos = [];
-        for (let i = 0; i < this.currPiece.pos.length; i++) {
-            let [y, x] = this.currPiece.pos[i];
-
-            let newX = refX - (y - refY);
-            let newY = refY + (x - refX);
-
-            pos.push([newY, newX]);
-        }
-        this.render();
-        return pos;
-        
     }
 
     // whenever the board is updated, checkLines will call the neccessary functions
