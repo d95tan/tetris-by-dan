@@ -7,7 +7,7 @@ Welcome to [Tetris by Dan](https://tetris-by-dan.vercel.app/)! This project is a
 ## Gameplay
 <img src="./Tetris-Dan/public/Start-game.jpg" alt="starting page" width = 300px style="border:solid black 1px">
 <img src="./Tetris-Dan/public/Mid-game.jpg" alt="starting page" width = 300px style="border:solid black 1px">
-<img src="./Tetris-Dan/public/end-game.jpg" alt="starting page" width = 300px style="border:solid black 1px">
+<img src="./Tetris-Dan/public/End-game.jpg" alt="starting page" width = 300px style="border:solid black 1px">
 
 ## Features
 - A mix of Classic Tetris with some modern quality-of-life features such as the **hold** function
