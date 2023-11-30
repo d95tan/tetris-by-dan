@@ -5,9 +5,9 @@
 Welcome to [Tetris by Dan](https://tetris-by-dan.vercel.app/)! This project is an implementation of Tetris using Javascript and DOM Manipulation. It aims to reignite the nostalgia of playing Tetris on arcade machines, where players arrange falling shapes (Tetrimonoes) to create complete rows.
 
 ## Gameplay
-<img src="./Tetris-Dan/public/Start-game.jpg" alt="starting page" width = 300px style="border:solid black 1px">
-<img src="./Tetris-Dan/public/Mid-game.jpg" alt="starting page" width = 300px style="border:solid black 1px">
-<img src="./Tetris-Dan/public/End-game.jpg" alt="starting page" width = 300px style="border:solid black 1px">
+<img src="./Tetris-Dan/public/Start-game.jpg" alt="starting page" width = 300px style="border:solid black 1px"> <br/>
+<img src="./Tetris-Dan/public/Mid-game.jpg" alt="game page" width = 300px style="border:solid black 1px"> <br/>
+<img src="./Tetris-Dan/public/End-game.jpg" alt="end page" width = 300px style="border:solid black 1px"> <br/>
 
 ## Features
 - A mix of Classic Tetris with some modern quality-of-life features such as the **hold** function
