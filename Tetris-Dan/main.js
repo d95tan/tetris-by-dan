@@ -50,7 +50,7 @@ class GAME {
         this.state = state || "start";
         this.score = 0;
         this.createBoard();
-        this.renderBoard = this.renderBoard.bind(this); //omg ded
+        this.renderBoard = this.renderBoard.bind(this);
         this.next = 0;
         this.hold = 0;
         this.holdEnabled = true;
@@ -60,7 +60,7 @@ class GAME {
         this.lines = 0;
         this.newPiece();
         this.newPiece();
-        this.isActionValid();
+        this.keydownListener();
     }
 
     // Adds event listeners to level buttons
@@ -101,7 +101,7 @@ class GAME {
         this.refreshRate = 1000 / this.currLevel;
     }
 
-    // Creates empty board array based on dimensions
+    // Creates empty board array based on dimensions (default is 10 X 20)
     createBoard() {
         this.board = [];
         for (let i = 0; i < DIMENSION[0]; i++) {
@@ -114,7 +114,7 @@ class GAME {
     }
 
     // updateBoard is only called when the current piece reaches its bottom position
-    // it will then update the existing board to include the current piece
+    // it will then "lock-in" the piece to this.board
     updateBoard() {
         for (let yx of this.currPiece.pos) {
             this.board[yx[0]][yx[1]] = this.currPiece.emoji;
@@ -122,8 +122,8 @@ class GAME {
     }
 
     // Checks if piece can move down, and call moveDOWN if possible -
-    // if cannot, will call updateBoard to include the currPiece, call checkLines, and
-    // create new piece.
+    // if cannot (i.e piece is at bottom or something below), will call updateBoard to include the currPiece, call checkLines,
+    // and create new piece.
     // if dead, then will render the end screen.
     // returns 0 when dead, 1 for piece locked, 2 for piece moving
     isMoveDownValid() {
@@ -153,7 +153,7 @@ class GAME {
     }
     
     // keeps moving the currPiece down 1 row every 0.1s
-    // once down is released, the previous timer is stopped.
+    // once down-key is released, the movement is stopped.
     softDrop() {
         let softDropInterval = setInterval(this.isMoveDownValid.bind(this), 100)
         
@@ -164,7 +164,7 @@ class GAME {
         })
     }
 
-    // essentially same as above, just that a while loop is used for "instantaneous" drop
+    // Conceptually similar to softDrop, but instead uses a while loop is used for "instantaneous" drop
     // makes use of return value from isMoveDownValid to break loop
     hardDrop() {
         while (true) {
@@ -175,9 +175,9 @@ class GAME {
         }
     }
 
-    // event listener for the player's keyboard inputs
-    // does the checking for left, right and rotation
-    isActionValid() {
+    // Event listener for the player's keyboard inputs
+    // does not validate the movements
+    keydownListener() {
         document.addEventListener("keydown", (event) => {
             if (event.key === "a" || event.key === "ArrowLeft") {
                 this.isMoveLRValid(-1,true);
@@ -189,46 +189,7 @@ class GAME {
                 if (event.repeat) {
                     return;
                 }
-                if (this.currPiece.ref) {
-                    this.rotate();
-                    let rotate = true;
-                    for (let yx of this.tempPos) {
-                        if (yx[0] < 0) {                                // piece is at top (seldom an issue) 
-                            return;
-                        }
-                        else if (yx[1] < 0) {                           // piece is at left border
-                            if (!this.isMoveLRValid(1, false)) {
-                                if (!this.isMoveLRValid(2,false)) {
-                                    return;
-                                }
-                                return;
-                            }
-                            return;
-                        }
-                        else if (yx[1] >= DIMENSION[1]) {               // piece is at right border
-                            if (!this.isMoveLRValid(-1, false)) {
-                                if (!this.isMoveLRValid(-2,false)) {
-                                    return;
-                                }
-                                return;
-                            }
-                            return;
-                        } 
-                        else if (yx[0] >= DIMENSION[0]) {               // piece is at bottom
-                            if (!this.isMoveUpValid()) {
-                                return;
-                            }
-                            return;
-                        }
-                        else if (this.board[yx[0]][yx[1]] !== "⬜") {
-                            rotate = false;
-                        }
-                    }
-                    if (rotate) {
-                        this.currPiece.pos = structuredClone(this.tempPos);
-                        this.render();
-                    }
-                }
+                this.isRotateValid();
             }
             else if (event.key === " ") {
                 this.hardDrop();
@@ -248,6 +209,8 @@ class GAME {
         });
     }
     
+    // If requested move is valid, calls moveLR and returns true
+    // else returns false
     isMoveLRValid(x, isCurrPiece) {
         let y;
         let pos = [];
@@ -276,7 +239,7 @@ class GAME {
         return true;
     }
 
-    // moves the currPiece in x direction
+    // moves the currPiece in x direction (by x units)
     moveLR(x) {
         for (let yx of this.currPiece.pos) {
             yx[1] += x;
@@ -284,6 +247,7 @@ class GAME {
         this.render();
     }
 
+    // only used when currPiece rotated at the base
     isMoveUpValid() {
         let y = 1;
         for (let yx of this.tempPos) {
@@ -299,6 +263,7 @@ class GAME {
         this.moveUp(y);
     }
 
+    // moves up by y units
     moveUp(y) {
         for (let yx of this.tempPos) {
             yx[0] -= y;
@@ -307,8 +272,52 @@ class GAME {
         this.render();
     }
 
+    // checks if piece can be rotated
+    // added additional logic to move piece left/right/up if piece is rotated while on the border
+    isRotateValid() {
+        if (this.currPiece.ref) {
+            this.rotate();
+            let rotate = true;
+            for (let yx of this.tempPos) {
+                if (yx[0] < 0) {                                // piece is at top (seldom an issue) 
+                    return;
+                }
+                else if (yx[1] < 0) {                           // piece is at left border
+                    if (!this.isMoveLRValid(1, false)) {
+                        if (!this.isMoveLRValid(2,false)) {
+                            return;
+                        }
+                        return;
+                    }
+                    return;
+                }
+                else if (yx[1] >= DIMENSION[1]) {               // piece is at right border
+                    if (!this.isMoveLRValid(-1, false)) {
+                        if (!this.isMoveLRValid(-2,false)) {
+                            return;
+                        }
+                        return;
+                    }
+                    return;
+                } 
+                else if (yx[0] >= DIMENSION[0]) {               // piece is at bottom
+                    if (!this.isMoveUpValid()) {
+                        return;
+                    }
+                    return;
+                }
+                else if (this.board[yx[0]][yx[1]] !== "⬜") {
+                    rotate = false;
+                }
+            }
+            if (rotate) {
+                this.currPiece.pos = structuredClone(this.tempPos);
+                this.render();
+            }
+        }
+    }
     // unlike moveLR and moveDOWN, rotate does not modify the currPiece
-    // instead, it stores the rotated coordinates so that isActionValid can check if the move is valid
+    // instead, it stores the rotated coordinates so that isRotateValid can check if the move is valid
     rotate() {
         let refX = this.currPiece.pos[this.currPiece.ref][1];
         let refY = this.currPiece.pos[this.currPiece.ref][0];
@@ -322,9 +331,10 @@ class GAME {
         }
     }
     
-    // adds hold functionality -
-    // resets the pos of hold so that it can spawn at the correct
-    // location when player re-spawns it.
+    // Adds hold functionality:
+    // Resets the pos of hold so that it can spawn at the correct 
+    // position when player calls for it.
+    // When Hold is used, it is then disabled until newPiece is called.
     storeHold() {
         if (!this.holdEnabled) {
             return false;
@@ -349,8 +359,8 @@ class GAME {
         }
     }
 
-    // whenever the board is updated, checkLines will call the neccessary functions
-    // to clear lines and update both score and level
+    // whenever the board is updated, checkLines will call the neccessary
+    // functions to clear lines and update both score and level
     checkLines() {
         let clearedLines = 0;
         for (let i = 0; i < this.board.length; i++) {
@@ -366,7 +376,7 @@ class GAME {
         }
     }
 
-    // takes an input row index and clears it, then pushes a new blank line at the top
+    // takes an input row index and clears it, then pushes a new empty line at the top
     clearLine(i) {
         this.board.splice(i,1);
         const newLine = [];
@@ -377,7 +387,8 @@ class GAME {
         this.lines++;
     }
 
-    // Uses math.random to pick piece create new piece (true random vs psuedo random)
+    // Uses math.random to pick piece create new piece
+    // True random was chosen over Psuedo random for simplicity
     // also checks if piece is blocked on spawn -> game over
     newPiece() {
         this.currPiece = this.next;
@@ -419,12 +430,13 @@ class GAME {
         return true;
     }
 
-    // returns an integer between 0 and 6 (both inclusive)
+    // Returns an integer between 0 and 6 (both inclusive)
+    // Used to "choose" the new piece
     getRandomInt() {
         return Math.floor(Math.random() * 7);
     }
 
-    // uses the score table to calculate and update the score.
+    // Uses the score table (global) to calculate and update the score based on n lines cleared.
     scoreCalculator(n) {
         let scoreLevel = this.currLevel;
         if (scoreLevel > 8) {
@@ -441,8 +453,8 @@ class GAME {
         }
     }
 
-    // level increases every 10 lines cleared.
-    // levelCalculator also stops the current interval timer and updates it with a new refresh rate.
+    // Level increases every 10 lines cleared.
+    // LevelCalculator also stops the current interval timer and updates it with a new refresh rate.
     levelCalculator() {
         this.currLevel = this.levelChoice + Math.floor(this.lines / 10);
         this.updateRefreshRate();
@@ -450,14 +462,19 @@ class GAME {
         this.run();
     }
 
+    // Is called when game is over.
+    // Checks if the player's score is better than the 5th place (ie made it to top 5)
+    // Does not calculate which position the player is in.
     checkHighscore() {
         if (this.score >= HIGHSCORE[4].score) {
             formName.style.display = "flex";
             endHighscore.style.display = "none";
-            this.insertHighscore()
+            this.insertHighscore();
         }
     }
     
+    // Logic to insert highscore. 
+    // HIGHSCORE should always be a sorted array - O(n) time complexity as the list is only called once.
     insertHighscore() {
         nameButton.addEventListener("click", () => {
             event.preventDefault();
@@ -467,7 +484,7 @@ class GAME {
                     HIGHSCORE.pop();
                     formNameInput.value = "";
                     formName.style.display = "none"
-                    generateHighScoreTable();
+                    populateHighScore();
                     endHighscore.style.display = "flex";
                     localStorage.setItem("highscores",JSON.stringify(HIGHSCORE));
                     break;
@@ -487,7 +504,7 @@ class GAME {
     }
 
     renderBoard() {
-        // let newBoard = this.board.map(row => [...row]);  // help from chatgpt to find fastest way to deepcopy an array
+        // let newBoard = this.board.map(row => [...row]);  // initial method of deepcopying an array
         let newBoard = structuredClone(this.board)          // found a better way to deepcopy an array
         for (let yx of this.currPiece.pos) {
             newBoard[yx[0]][yx[1]] = this.currPiece.emoji;
@@ -557,24 +574,25 @@ const playAgainButton = document.querySelector("#play-again");
 
 
 //* FUNCTIONS
+// Retrieves highscore from localStorage.
+// If no highscore found, a new highscore table is created.
 function getHighScore() {
-    const blankHiScore = ([{ name: ".....", score: 5000 },
+    const highscoreStr = localStorage.getItem("highscores");
+    if (!highscoreStr) {
+        HIGHSCORE = [{ name: ".....", score: 5000 },
         { name: ".....", score: 4000 },
         { name: ".....", score: 3000 },
         { name: ".....", score: 2000 },
-        { name: ".....", score: 1000 }]);
-    
-    const highscoreStr = localStorage.getItem("highscores");
-    if (!highscoreStr) {
-        HIGHSCORE = structuredClone(blankHiScore);
+        { name: ".....", score: 1000 }];
     }
     else {
         HIGHSCORE = JSON.parse(highscoreStr);
     }
-    generateHighScoreTable();
+    populateHighScore();
 }
 
-function generateHighScoreTable() {
+// Populates the highscore table
+function populateHighScore() {
     for (let i = 0; i < HIGHSCORE.length; i++) {
         document.querySelector(`#name${i + 1}`).innerText = HIGHSCORE[i].name;
         document.querySelector(`#score${i + 1}`).innerText = HIGHSCORE[i].score;
@@ -591,6 +609,7 @@ function main() {
     playAgainButton.addEventListener("click", (event) => {
         event.preventDefault();
         formNameInput.setAttribute("autofocus", false);
+        nameButton.setAttribute("autofocus", false);
         changeLevel.setAttribute("autofocus", false);
         playAgainButton.setAttribute("autofocus", false);
         tetris = new GAME("game");
