@@ -24,7 +24,10 @@ a {
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  background-image: linear-gradient(90deg, rgba(235,0,0,1) 0%, rgba(235,0,0,1) 17%, rgba(235,235,0,1) 17%, rgba(235,235,0,1) 33%, rgba(0,235,0,1) 33%, rgba(0,235,0,1) 50%, rgba(0,235,235,1) 50%, rgba(0,235,235,1) 67%, rgba(0,0,235,1) 67%, rgba(0,0,235,1) 83%, rgba(235,0,235,1) 83%, rgba(235,0,235,1) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   text-decoration-line: none;
 }
 
@@ -179,6 +182,21 @@ table {
   gap: 5px;
 }
 
+#form-level {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 120px;
+  margin-top: 10px;
+}
+
+#play-again {
+  width: 200px;
+  height: 75px;
+  margin-bottom: 20px;
+}
+
 #form-name {
   display: none;
   justify-content: space-evenly;
@@ -186,17 +204,11 @@ table {
   gap: 5px;
 }
 
-#form-level {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  width: 120px;
-}
-
-#play-again {
-  width: 200px;
-  height: 75px;
+#name-button {
+  height: 2em;
+  text-align: center;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 #copyright {
