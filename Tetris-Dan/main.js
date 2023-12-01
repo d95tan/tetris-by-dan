@@ -92,6 +92,7 @@ class GAME {
 
     // Starts an interval based on refresh rate
     run() {
+        autofocusOff();
         this.intervalID = setInterval(this.isMoveDownValid.bind(this), this.refreshRate); // ref: https://www.tutorialrepublic.com/faq/how-to-stop-setinterval-call-in-javascript.php
         this.render();
     }
@@ -344,19 +345,16 @@ class GAME {
             this.hold = this.currPiece;
             this.hold.pos = structuredClone(this.hold.spawn);
             this.newPiece();
-            this.holdEnabled = false;
-            this.render();
-            return true;
         }
         else {
             let temp = this.currPiece;
             this.currPiece = this.hold;
             this.hold = temp;
             this.hold.pos = structuredClone(this.hold.spawn);
-            this.holdEnabled = false;
-            this.render();
-            return true;
         }
+        this.holdEnabled = false;
+        this.render();
+        return true;
     }
 
     // whenever the board is updated, checkLines will call the neccessary
@@ -395,25 +393,25 @@ class GAME {
         this.holdEnabled = true;
         switch (this.getRandomInt()) {
             case 0:
-                this.next = new Ishape;
+                this.next = new Ishape();
                 break;
             case 1:
-                this.next = new Jshape;
+                this.next = new Jshape();
                 break;
             case 2:
-                this.next = new Lshape;
+                this.next = new Lshape();
                 break;
             case 3:
-                this.next = new Oshape;
+                this.next = new Oshape();
                 break;
             case 4:
-                this.next = new Sshape;
+                this.next = new Sshape();
                 break;
             case 5:
-                this.next = new Zshape;
+                this.next = new Zshape();
                 break;
             case 6:
-                this.next = new Tshape;
+                this.next = new Tshape();
                 break;
         }
         if (this.currPiece != 0) {
@@ -501,6 +499,7 @@ class GAME {
         this.renderLevel();
         this.renderNext();
         this.renderHold();
+        autofocusOff();
     }
 
     renderBoard() {
@@ -601,6 +600,13 @@ function populateHighScore() {
     }
 }
 
+function autofocusOff() {
+    formNameInput.setAttribute("autofocus", false);
+    nameButton.setAttribute("autofocus", false);
+    changeLevel.setAttribute("autofocus", false);
+    playAgainButton.setAttribute("autofocus", false);
+}
+
 function main() {
     getHighScore();
     let tetris = new GAME();
@@ -608,10 +614,7 @@ function main() {
     // play again functionality
     playAgainButton.addEventListener("click", (event) => {
         event.preventDefault();
-        formNameInput.setAttribute("autofocus", false);
-        nameButton.setAttribute("autofocus", false);
-        changeLevel.setAttribute("autofocus", false);
-        playAgainButton.setAttribute("autofocus", false);
+        autofocusOff();
         tetris = new GAME("game");
         tetris.setMode(tetris, changeLevel.value)();
     })
