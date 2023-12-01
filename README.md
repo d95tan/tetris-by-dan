@@ -33,6 +33,8 @@ Arrange the falling Tetrimonoes to fill complete rows. Clearing more than 1 row 
 
 ## Next Steps
 - "Ghost tile" feature - outline of falling tetrimono is shown at the bottom of the board
+- Pause feature
+- Mobile compatibility (responsive)
 - Dark mode
 - Soundtrack
 - Global leaderboard
